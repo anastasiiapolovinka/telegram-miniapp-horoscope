@@ -1,150 +1,149 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./App.css";
+import React, { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import "./index.css";
+
+const zodiacSigns = [
+  { name: "aries", period: { start: "March 21", end: "April 19" }, icon: "♈" },
+  { name: "taurus", period: { start: "April 20", end: "May 20" }, icon: "♉" },
+  { name: "gemini", period: { start: "May 21", end: "June 20" }, icon: "♊" },
+  { name: "cancer", period: { start: "June 21", end: "July 22" }, icon: "♋" },
+  { name: "leo", period: { start: "July 23", end: "August 22" }, icon: "♌" },
+  {
+    name: "virgo",
+    period: { start: "August 23", end: "September 22" },
+    icon: "♍",
+  },
+  {
+    name: "libra",
+    period: { start: "September 23", end: "October 22" },
+    icon: "♎",
+  },
+  {
+    name: "scorpio",
+    period: { start: "October 23", end: "November 21" },
+    icon: "♏",
+  },
+  {
+    name: "sagittarius",
+    period: { start: "November 22", end: "December 21" },
+    icon: "♐",
+  },
+  {
+    name: "capricorn",
+    period: { start: "December 22", end: "January 19" },
+    icon: "♑",
+  },
+  {
+    name: "aquarius",
+    period: { start: "January 20", end: "February 18" },
+    icon: "♒",
+  },
+  {
+    name: "pisces",
+    period: { start: "February 19", end: "March 20" },
+    icon: "♓",
+  },
+];
 
 function App() {
+  const { t: translate, i18n } = useTranslation();
   const [selectedSign, setSelectedSign] = useState(null);
-  const [horoscope, setHoroscope] = useState("");
-  const [language, setLanguage] = useState("en");
-
-  // Список знаков зодиака с названиями, периодами и иконками
-  const zodiacSigns = [
-    {
-      id: "aries",
-      name: { en: "Aries", ru: "Овен" },
-      period: "21 Mar - 19 Apr",
-      icon: "♈",
-    },
-    {
-      id: "taurus",
-      name: { en: "Taurus", ru: "Телец" },
-      period: "20 Apr - 20 May",
-      icon: "♉",
-    },
-    {
-      id: "gemini",
-      name: { en: "Gemini", ru: "Близнецы" },
-      period: "21 May - 20 Jun",
-      icon: "♊",
-    },
-    {
-      id: "cancer",
-      name: { en: "Cancer", ru: "Рак" },
-      period: "21 Jun - 22 Jul",
-      icon: "♋",
-    },
-    {
-      id: "leo",
-      name: { en: "Leo", ru: "Лев" },
-      period: "23 Jul - 22 Aug",
-      icon: "♌",
-    },
-    {
-      id: "virgo",
-      name: { en: "Virgo", ru: "Дева" },
-      period: "23 Aug - 22 Sep",
-      icon: "♍",
-    },
-    {
-      id: "libra",
-      name: { en: "Libra", ru: "Весы" },
-      period: "23 Sep - 22 Oct",
-      icon: "♎",
-    },
-    {
-      id: "scorpio",
-      name: { en: "Scorpio", ru: "Скорпион" },
-      period: "23 Oct - 21 Nov",
-      icon: "♏",
-    },
-    {
-      id: "sagittarius",
-      name: { en: "Sagittarius", ru: "Стрелец" },
-      period: "22 Nov - 21 Dec",
-      icon: "♐",
-    },
-    {
-      id: "capricorn",
-      name: { en: "Capricorn", ru: "Козерог" },
-      period: "22 Dec - 19 Jan",
-      icon: "♑",
-    },
-    {
-      id: "aquarius",
-      name: { en: "Aquarius", ru: "Водолей" },
-      period: "20 Jan - 18 Feb",
-      icon: "♒",
-    },
-    {
-      id: "pisces",
-      name: { en: "Pisces", ru: "Рыбы" },
-      period: "19 Feb - 20 Mar",
-      icon: "♓",
-    },
-  ];
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
-    // Автоматическое определение языка Telegram
     const userLanguage =
-      window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
-    setLanguage(userLanguage === "ru" ? "ru" : "en");
-  }, []);
+      window.Telegram.WebApp.initDataUnsafe?.user?.language_code;
+    const initialLanguage = userLanguage === "ru" ? "ru" : "en";
+    i18n.changeLanguage(initialLanguage);
+  }, [i18n]);
 
-  const fetchHoroscope = async (signId) => {
-    try {
-      const response = await axios.post(
-        "https://poker247tech.ru/get_horoscope/",
-        {
-          sign: signId,
-          language: language === "ru" ? "original" : "translated",
-          period: "today",
-        }
-      );
-      setHoroscope(response.data.description);
-      setSelectedSign(signId);
-    } catch (error) {
-      console.error("Error fetching horoscope:", error);
-    }
-  };
+  const fetchHoroscope = useCallback(
+    async (sign) => {
+      try {
+        const response = await fetch("https://poker247tech.ru/get_horoscope/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sign: sign,
+            language: i18n.language === "ru" ? "original" : "translated",
+            period: "today",
+          }),
+        });
+        const data = await response.json();
+        setDescription(
+          data.horoscope || translate("Description not available.")
+        );
+      } catch (error) {
+        console.error("Error fetching horoscope:", error);
+        setDescription(translate("Description not available."));
+      }
+    },
+    [i18n.language, translate]
+  );
 
   const goBack = () => {
     setSelectedSign(null);
-    setHoroscope("");
+    setDescription("");
   };
 
-  const changeLanguage = (lang) => {
-    setLanguage(lang);
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+    if (selectedSign) {
+      fetchHoroscope(selectedSign);
+    }
   };
+
+  useEffect(() => {
+    if (selectedSign) {
+      fetchHoroscope(selectedSign);
+    }
+  }, [fetchHoroscope, selectedSign]);
+
+  const formatPeriod = (period) => {
+    const [startMonth, startDay] = period.start.split(" ");
+    const [endMonth, endDay] = period.end.split(" ");
+
+    return `${translate(startMonth)} ${startDay} - ${translate(
+      endMonth
+    )} ${endDay}`;
+  };
+
+  if (selectedSign) {
+    return (
+      <div className="description-container">
+        <h1 className="description-header">{translate(selectedSign)}</h1>
+        <p className="description-text">{description}</p>
+        <button onClick={goBack}>{translate("Back")}</button>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
-      <header className="App-header">
-        <div className="language-switcher">
-          <button onClick={() => changeLanguage("ru")}>Русский</button>
-          <button onClick={() => changeLanguage("en")}>English</button>
-        </div>
-        {selectedSign ? (
-          <div className="horoscope-details">
-            <button onClick={goBack}>Back</button>
-            <p>{horoscope}</p>
+      <div className="language-switcher">
+        <button onClick={() => handleLanguageChange("en")}>
+          {translate("English")}
+        </button>
+        <button onClick={() => handleLanguageChange("ru")}>
+          {translate("Russian")}
+        </button>
+      </div>
+      <h1>{translate("Zodiac Horoscope")}</h1>
+      <div className="zodiac-grid">
+        {zodiacSigns.map((sign) => (
+          <div
+            key={sign.name}
+            className="zodiac-item"
+            onClick={() => setSelectedSign(sign.name)}
+          >
+            <div className="zodiac-icon">{sign.icon}</div>
+            <div className="zodiac-name">{translate(sign.name)}</div>
+            <div className="zodiac-period">{formatPeriod(sign.period)}</div>
           </div>
-        ) : (
-          <div className="zodiac-container">
-            {zodiacSigns.map((sign) => (
-              <div
-                className="zodiac-block"
-                key={sign.id}
-                onClick={() => fetchHoroscope(sign.id)}
-              >
-                <h3>
-                  {sign.icon} {sign.name[language]}
-                </h3>
-                <p>{sign.period}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </header>
+        ))}
+      </div>
     </div>
   );
 }

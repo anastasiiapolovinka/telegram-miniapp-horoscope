@@ -1,0 +1,82 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+const resources = {
+  en: {
+    translation: {
+      "Zodiac Horoscope": "Zodiac Horoscope",
+      "Description not available.": "Description not available.",
+      Back: "Back",
+      English: "English",
+      Russian: "Русский",
+      aries: "Aries",
+      taurus: "Taurus",
+      gemini: "Gemini",
+      cancer: "Cancer",
+      leo: "Leo",
+      virgo: "Virgo",
+      libra: "Libra",
+      scorpio: "Scorpio",
+      sagittarius: "Sagittarius",
+      capricorn: "Capricorn",
+      aquarius: "Aquarius",
+      pisces: "Pisces",
+      January: "January",
+      February: "February",
+      March: "March",
+      April: "April",
+      May: "May",
+      June: "June",
+      July: "July",
+      August: "August",
+      September: "September",
+      October: "October",
+      November: "November",
+      December: "December",
+    },
+  },
+  ru: {
+    translation: {
+      "Zodiac Horoscope": "Зодиакальный гороскоп",
+      "Description not available.": "Описание недоступно.",
+      Back: "Назад",
+      English: "Английский",
+      Russian: "Русский",
+      aries: "Овен",
+      taurus: "Телец",
+      gemini: "Близнецы",
+      cancer: "Рак",
+      leo: "Лев",
+      virgo: "Дева",
+      libra: "Весы",
+      scorpio: "Скорпион",
+      sagittarius: "Стрелец",
+      capricorn: "Козерог",
+      aquarius: "Водолей",
+      pisces: "Рыбы",
+      January: "Январь",
+      February: "Февраль",
+      March: "Март",
+      April: "Апрель",
+      May: "Май",
+      June: "Июнь",
+      July: "Июль",
+      August: "Август",
+      September: "Сентябрь",
+      October: "Октябрь",
+      November: "Ноябрь",
+      December: "Декабрь",
+    },
+  },
+};
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: "en",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+});
+
+export default i18n;
